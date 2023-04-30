@@ -1,0 +1,96 @@
+<html>
+	<head>
+		<title>Segmap Builder 0.1</title>
+		<link href="style.css" type="text/css" rel="stylesheet">
+		<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+		<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<div id="wrapper">
+			<div id="modal" style="display:none">
+				<div id="modal_label">
+					<div class="titulo">Label</div>
+					<div class="flexForm">
+						<div class="flexForm">
+							<label for="modal_labelNome">Nome: </label>
+							<input type="text" id="modal_labelNome">
+						</div>
+						<div class="flexForm">
+							<label for="modal_labelCor">Cor: </label>
+							<input type="color" id="modal_labelCor">
+						</div>
+					</div>
+					<div class="flexForm">
+						<label for="modal_labelImagem">Imagem de amostra: </label>
+						<input type="file" id="modal_labelImagem" onchange="atualizarPreviewModalLabel()">
+					</div>
+					<div id="modal_labelAmostraImagem" class="previewer" style="display: none">
+						<hr>
+						<img src="#" class="imagemLabel" id="modal_labelPreview">
+						<hr>
+					</div>
+					<div class="botoes direita">
+						<button onclick="aplicarNovoLabel()">Adicionar</button>&ThickSpace;
+						<button onclick="sumirModal()" class="secundario">Cancelar</button>
+					</div>
+				</div>
+				<div id="modal_analise">
+					<div class="titulo">Análise</div>
+					<div class="flexForm">
+						<label for="modal_analiseImagem">Imagem para analisar: </label>
+						<input type="file" id="modal_analiseImagem" onchange="atualizarPreviewModalAnalise()">
+					</div>
+					<div id="modal_analiseAmostraImagem" class="previewer" style="display: none">
+						<hr>
+						<img src="#" class="imagemAnalise" id="modal_analisePreview">
+						<hr>
+					</div>
+					<div class="botoes direita">
+						<button onclick="aplicarNovaAnalise()">Adicionar</button>&ThickSpace;
+						<button onclick="sumirModal()" class="secundario">Cancelar</button>
+					</div>
+				</div>
+			</div>
+			<div id="menu" class="controle botoes">
+				<button></button>
+				<hr>
+				<button onclick="iniciarProcessamentoTodasAnalises()">Iniciar</button>
+				<button onclick="pausarProcessamento()">Pausar</button>
+				<button onclick="continuarProcessamento()">Continuar</button>
+				<button onclick="processarProximaAnalise()">Processar próximo</button>
+			</div>
+			<div id="labels" class="controle">
+				<div class="titulo">Labels</div>
+				<div class="botoes">
+					<button title="Adicionar um novo label" onclick="exibirModal('label')">+</button>
+				</div>
+				<div id="listaLabels">
+				</div>
+			</div>
+			<div id="analise">
+				<div class="titulo">Análise</div>
+				<div class="botoes">
+					<button title="Adicionar uma nova análise" onclick="exibirModal('analise')">+</button>
+				</div>
+				<div id="listaAnalises">
+					<video autoplay playsinline muted id="webcam" width="224" height="224" style="display:none"></video>
+				</div>
+			</div>
+			<div id="status" class="controle">
+				<div class="titulo">Status</div>
+				<img id="testeLabel" crossOrigin="Anonymous" src="testeLabel.png" style="display:none">
+				<img id="testeLabel2" crossOrigin="Anonymous" src="testeLabel2.png" style="display:none">
+				<img id="testeLabel3" crossOrigin="Anonymous" src="testeLabel3.png" style="display:none">
+				<img id="testeLabel4" crossOrigin="Anonymous" src="testeLabel4.png" style="display:none">
+				<img id="testeLabel5" crossOrigin="Anonymous" src="testeLabel5.png" style="display:none">
+				<img id="testeAnalise" crossOrigin="Anonymous" src="testeAnalise.png" style="display:none">
+				<img id="testeAnalise2" crossOrigin="Anonymous" src="testeAnalise2.png" style="display:none">
+				<img id="testeAnalise3" crossOrigin="Anonymous" src="testeAnalise3.png" style="display:none">
+				<img id="testeAnalise4" crossOrigin="Anonymous" src="testeAnalise4.png" style="display:none">
+			</div>
+		</div>
+		<script src="segmapBuilder.js"></script>
+	</body>
+</html>

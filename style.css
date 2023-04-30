@@ -1,0 +1,202 @@
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+fieldset {
+	border: 1px solid #AAA;
+}
+hr {
+	border: none;
+	border-top: 1px solid #AAA;
+	border-left: 1px solid #AAA;
+}
+button {
+	background-color: #88D;
+	color: #FFF;
+	border: 1px solid #AAF;
+	padding: 0.5em 1em;
+}
+button.secundario {
+	background-color: #FFF;
+	color: #88D;
+}
+button.terciario {
+	background-color: transparent;
+	color: #88D;
+	text-decoration: underline;
+	border: none;
+}
+button:hover {
+	color: #FFF;
+	text-decoration: none;
+	background-color: #AAF;
+}
+button:active {
+	background-color: #66B;
+}
+input {
+	border: 1px solid #AAF;
+	font-size: 1em;
+	padding: 0.5em;
+}
+input[type="color"] {
+	padding: initial;
+}
+img.imagemLabel {
+	margin: 0px auto;
+	display: block;
+	width: 64px;
+	height: 64px;
+}
+img.imagemAnalise {
+	margin: 0px auto;
+	display: block;
+	width: 256px;
+	height: 256px;
+}
+p {
+	margin: 0.5em 0em;
+}
+.botoes {
+	display: flex;
+	flex-wrap: nowrap;
+	flex-direction: row;
+	height: 2em;
+}
+.botoes.direita {
+	flex-direction: row-reverse;
+}
+.botoes hr {
+	margin: 0.5em;
+}
+.controle {
+	position: absolute;
+	background-color: #FFF;
+}
+.titulo {
+	width: calc(100% - 2em);
+	height: 1rem;
+	font-size: 0.75em;
+	background-color: #EEE;
+	padding-left: 1em;
+	padding-right: 1em;
+	border-bottom: 1px solid #DDD;
+	margin-bottom: 0.5rem;
+}
+.flexForm {
+	display: flex;
+	flex-wrap: wrap;
+	white-space: break-spaces;
+	align-items: center;
+	margin-block: 0.5em;
+	margin-inline-start: 0em;
+	margin-inline-end: 0.5em;
+}
+.flexForm input {
+	flex-grow: 2;
+}
+#wrapper {
+	width: 100%;
+	height: 100%;
+	background-color: #EEE;
+}
+#menu {
+	width: 100%;
+	height: 2em;
+	border-bottom: 1px solid #AAF;
+	top: 0em;
+	left: 0em;
+	z-index: 10;
+}
+#labels {
+	left: 0em;
+	top: 2em;
+	width: 15em;
+	height: calc(100% - 2em);
+	z-index: 9;
+	border-right: 1px solid #AAF;
+}
+#listaLabels {
+	height: calc(100% - 3.75em + 3px);
+	overflow-y: scroll;
+}
+#listaLabels fieldset canvas {
+	max-width: 50%;
+	width: 32px;
+	height: 32px;
+	float: left;
+	margin: 0.5em;
+}
+#listaLabels fieldset p {
+	margin: 0em;
+}
+#status {
+	width: 10em;
+	top: 2em;
+	right: 0em;
+	z-index: 9;
+	border-left: 1px solid #AAF;
+	height: calc(100% - 2em);
+}
+#status canvas {
+	width: 90%;
+	border: 1px solid;
+}
+#analise {
+	position: absolute;
+	left: calc(15em + 1px);
+	top: 2em;
+	width: calc(100% - 10em - 15em - 2px);
+	height: calc(100% - 2em);
+}
+#listaAnalises {
+	height: calc(100% - 3.75em + 3px);
+	display: flex;
+	align-items: flex-start;
+	flex-wrap: wrap;
+	overflow-y: scroll;
+	justify-content: space-evenly;
+	align-content: flex-start;
+}
+#listaAnalises div.analise {
+	padding: 1em;
+}
+#listaAnalises canvas {
+	box-shadow: 0px 3px 6px #0004;
+	max-width: 256px;
+	max-height: 256px;
+	width: calc(50% - 2em);
+	margin: 1em;
+}
+#listaAnalises progress {
+	width: 100%;
+}
+#modal {
+	background-color: #FFFB;
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0em;
+	left: 0em;
+	z-index: 15;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+#modal > div {
+	background-color: #FFF;
+	box-shadow: 0px 3px 6px #0004;
+	padding: 0.5em;
+	padding-top: 0em;
+	padding-bottom: 1em;
+	display: none;
+}
+#modal > div .titulo {
+	margin-left: -0.5em;
+	width: calc(100% - 1em);
+}
+#modal > div.exibir {
+	display: block;
+}
