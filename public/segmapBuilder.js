@@ -672,14 +672,15 @@ async function tensorflow_detectarImagem(argImagem,argRelatar=true) {
 document.body.onload=async function(){
 	preload=false;
 	atualizarStatusGeral();
-	aplicarNovoLabel("tijolo","#000000",document.getElementById("testeLabel"));
-	aplicarNovoLabel("cimento","#000000",document.getElementById("testeLabel2"));
-	aplicarNovoLabel("grama","#000000",document.getElementById("testeLabel3"));
-	aplicarNovoLabel("gramaSeca","#000000",document.getElementById("testeLabel4"));
-	aplicarNovoLabel("terra","#000000",document.getElementById("testeLabel5"));
-	criarNovaAnalise(document.getElementById("testeAnalise"));
-	criarNovaAnalise(document.getElementById("testeAnalise2"));
-	criarNovaAnalise(document.getElementById("testeAnalise3"));
-	criarNovaAnalise(document.getElementById("testeAnalise4"));
+	//aplicarNovoLabel("tijolo","#000000",document.getElementById("testeLabel"));
+	//aplicarNovoLabel("cimento","#000000",document.getElementById("testeLabel2"));
+	//aplicarNovoLabel("grama","#000000",document.getElementById("testeLabel3"));
+	//aplicarNovoLabel("gramaSeca","#000000",document.getElementById("testeLabel4"));
+	//aplicarNovoLabel("terra","#000000",document.getElementById("testeLabel5"));
+	//criarNovaAnalise(document.getElementById("testeAnalise"));
+	//criarNovaAnalise(document.getElementById("testeAnalise2"));
+	//criarNovaAnalise(document.getElementById("testeAnalise3"));
+	//criarNovaAnalise(document.getElementById("testeAnalise4"));
+	exibirModal('configuracoes');
 	iniciarTensorflow();
 }

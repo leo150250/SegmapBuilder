@@ -85,6 +85,17 @@ p {
 	border-bottom: 1px solid #DDD;
 	margin-bottom: 0.5rem;
 }
+.titulo2 {
+	width: calc(100% - 2px);
+	height: 1rem;
+	font-size: 0.75em;
+	background: linear-gradient(to left, #EEE0, #EEEF);
+	padding-left: 1em;
+	padding-right: 1em;
+	margin-top: 0rem;
+	/* border-bottom: 1px solid #DDD; */
+	margin-bottom: 0.5rem;
+}
 .flexForm {
 	display: flex;
 	flex-wrap: wrap;
@@ -194,9 +205,16 @@ p {
 	display: none;
 }
 #modal > div .titulo {
-	margin-left: -0.5em;
-	width: calc(100% - 1em);
+	margin-left: -0.5rem;
+	width: calc(100% - 0.5rem);
+}
+#modal > div .titulo2 {
+	margin-left: -0.5rem;
+	width: calc(100% - 0.5rem);
 }
 #modal > div.exibir {
 	display: block;
+}
+#modal hr {
+	border-color: #AAF;
 }
