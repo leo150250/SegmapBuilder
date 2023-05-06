@@ -1,5 +1,12 @@
 //Opções gerais
-apenasQuadrantar=false;
+var apenasQuadrantar=false;
+var preload=true;
+var maximoClassificacoes=10;
+var numAmostrasAleatorias=50;
+var emProcesso=false;
+var tamanhoMinimo=16;
+var tamanhoMaximo=64;
+var threadsProcessamento=8;
 
 //Cores
 class Cor {
@@ -230,14 +237,12 @@ function criarNovaAnalise(argFoto) {
 //Processamento de análises
 var processosAnalises=[];
 var numProcessosAnalises=0;
-var emProcesso=false;
 var outraVariavel=true;
 var analiseProcessada=0;
 var processoProcessado=0;
-var tamanhoMinimo=16;
-var tamanhoMaximo=64;
-var threadsProcessamento=8;
 var thresholdProcessamento=0;
+var processosProntos=0;
+var processosContinuar=0;
 class ProcessoAnalise {
 	analiseFoto=null;
 	x1=0;
@@ -283,27 +288,24 @@ class ProcessoAnalise {
 		this.analiseFoto.atualizarProgresso(this.porcao);
 	}
 }
+var timerStatusUpdate=null;
 function iniciarProcessamentoTodasAnalises() {
 	if (numAnalises>0) {
 		if (analiseProcessada!=numAnalises) {
 			processosAnalises.length=0;
 			analiseProcessada=0;
 			processoProcessado=0;
-			analises[analiseProcessada].gerarProcesso();
 			console.log("Iniciando processamento das análises...");
-			emProcesso=true;
-			for (let i=0; i<threadsProcessamento; i++) {
-				processarProximaAnalise(i);
-			}
 		} else {
 			analiseProcessada++;
-			analises[analiseProcessada].gerarProcesso();
 			console.log("Continuando processamento das análises...");
-			emProcesso=true;
-			for (let i=0; i<threadsProcessamento; i++) {
-				processarProximaAnalise(i);
-			}
 		}
+		analises[analiseProcessada].gerarProcesso();
+		emProcesso=true;
+		for (let i=0; i<threadsProcessamento; i++) {
+			processarProximaAnalise(i);
+		}
+		timerStatusUpdate=setInterval(atualizarStatusGeral,100);
 	}
 	//analiseProcessada=0;
 	//emProcesso=true;
@@ -323,7 +325,7 @@ async function processarProximaAnalise(argThread=0) {
 		let largura=processoAtual.x2-processoAtual.x1;
 		let altura=processoAtual.y2-processoAtual.y1;
 		//Inicia processamento:
-		console.log("Processo ("+largura+" x "+altura+")");
+		//console.log("Processo ("+largura+" x "+altura+")");
 		if ((largura>tamanhoMaximo)
 		|| (altura>tamanhoMaximo)) {
 			processoAtual.quadrantar();
@@ -340,9 +342,6 @@ async function processarProximaAnalise(argThread=0) {
 				0,0,
 				largura,
 				altura);
-			if (argThread==0) {
-				divStatus.innerHTML="";
-			}
 			//divStatus.appendChild(canvasProcessado);
 			resultado = await tensorflow_detectarImagem(canvasProcessado,(argThread==0));
 			if (resultado.confidences[resultado.label]<1) {
@@ -370,18 +369,29 @@ async function processarProximaAnalise(argThread=0) {
 	}
 	thresholdProcessamento--;
 	if (processoProcessado>=numProcessosAnalises) {
-		if (analiseProcessada>=numAnalises) {
-			emProcesso=false;
-			console.log("Fim do processamento!");
-		} else {
-			console.log("Análise concluída");
-			while (thresholdProcessamento>0) {
-				console.log("Aguardando threshold ("+thresholdProcessamento+")");
-				await new Promise(r => setTimeout(r, 1000)); //Aguardar por 1 segundo
+		console.log("Análise concluída");
+		processosProntos++;
+		if (processosProntos<threadsProcessamento) {
+			console.log("Aguardando threads ("+(threadsProcessamento-processosProntos)+")");
+			while (processosProntos<threadsProcessamento) {
+				if (processosContinuar>0) {
+					processosContinuar--;
+					break;
+				} else {
+					await new Promise(r => setTimeout(r, 1000)); //Aguardar por 1 segundo
+				}
 			}
-			if (argThread==0) {
-				console.log("Threshold zerado. Prosseguindo para o processamento da próxima análise...");
-				analiseProcessada++;
+		}
+		//console.log("Prosseguindo...");
+		if (argThread==0) {
+			processosProntos=0;
+			processosContinuar=threadsProcessamento-1;
+			analiseProcessada++;
+			if (analiseProcessada>=numAnalises) {
+				emProcesso=false;
+				console.log("Fim do processamento!");
+			} else {
+				console.log("Prosseguindo para a análise "+analiseProcessada+"...");
 				analises[analiseProcessada].gerarProcesso();
 			}
 		}
@@ -390,6 +400,8 @@ async function processarProximaAnalise(argThread=0) {
 		setTimeout(()=>{
 			processarProximaAnalise(argThread);
 		},1);
+	} else {
+		console.log("Thread "+argThread+" encerrada.");
 	}
 	/*
 	if (analiseProcessada<2) {
@@ -532,20 +544,48 @@ function atualizarPreviewModalAnalise() {
 
 //Status
 const divStatus=document.getElementById("status");
+const divStatusGeral=document.getElementById("statusGeral");
+const divStatusLeituras=document.getElementById("statusLeituras");
+function atualizarStatusGeral(argStatus="") {
+	let textoStatus="";
+	if (argStatus=="") {
+		if (preload) {
+			textoStatus="Carregando...";
+		} else {
+			if (!tensorFlowIniciado) {
+				textoStatus="Mobilenet não carregado";
+			} else {
+				if (amostrasCarregadasTensorflow<numLabels) {
+					textoStatus="Carregando amostras...";
+				} else {
+					if (emProcesso) {
+						textoStatus="Em execução ("+thresholdProcessamento+"):";
+					} else {
+						textoStatus="Pronto!";
+					}
+				}
+			}
+		}
+	} else {
+		textoStatus=argStatus;
+	}
+	divStatusGeral.innerHTML=textoStatus;
+}
 
 //Classificador KNN
 var KNN;
 var MBNET;
 const webcamElement = document.getElementById('webcam');
 var tensorFlowIniciado=false;
-var maximoClassificacoes=10;
-var numAmostrasAleatorias=50;
+var amostrasCarregadasTensorflow=0;
 async function iniciarTensorflow() {
+	atualizarStatusGeral("Carregando mobilenet...");
 	console.log('Iniciando mobilenet..');
 	KNN = knnClassifier.create();
 	MBNET = await mobilenet.load();
   	console.log('Modelo carregado');
 	tensorFlowIniciado=true;
+	atualizarStatusGeral();
 	//Ao inicia o tensorflow, se tiver quaisquer labels já adicionados, incrementa eles pro knn
 	for (let i=0; i<numLabels; i++) {
 		await tensorflow_adicionarAmostra(labels[i]);
@@ -566,12 +606,13 @@ async function iniciarTensorflow() {
 	}*/
 }
 async function tensorflow_adicionarAmostra(argLabel) {
+	atualizarStatusGeral();
 	//Perara um canvas
 	console.log("Carregando amostras do label "+argLabel.nomeLabel+"...");
 	let imagemAdaptada = document.createElement("canvas");
 	imagemAdaptada.width=224;
 	imagemAdaptada.height=224;
-	divStatus.appendChild(imagemAdaptada);
+	divStatusLeituras.appendChild(imagemAdaptada);
 	let ctx = imagemAdaptada.getContext("2d");
 	ctx.drawImage(argLabel.imagemLabel,0,0,224,224);
 	const logits = await MBNET.infer(imagemAdaptada, true);
@@ -592,6 +633,8 @@ async function tensorflow_adicionarAmostra(argLabel) {
 		} else {
 			clearInterval(carregamento);
 			console.log("Label "+argLabel.nomeLabel+" carregado");
+			amostrasCarregadasTensorflow++;
+			atualizarStatusGeral();
 		}
 	},1);
 	//divStatus.appendChild(argLabel.imagem);
@@ -604,22 +647,18 @@ async function tensorflow_detectarImagem(argImagem,argRelatar=true) {
 	var ctx = imagemAdaptada.getContext("2d");
 	//Copia a imagem enviada pro tensorflow detectar, nas dimensões da Mobilenet
 	ctx.drawImage(argImagem,0,0,224,224);
-	if (argRelatar) {
-		divStatus.appendChild(imagemAdaptada);
-	}
 	//Faz a predição
 	const numClasses = KNN.getNumClasses();
 	if (numClasses > 0) {
 		const logits = MBNET.infer(imagemAdaptada, 'conv_preds');
 		const result = await KNN.predictClass(logits, maximoClassificacoes);
-		console.log(result.confidences);
+		//console.log(result.confidences);
 		if (argRelatar) {
+			divStatusLeituras.innerHTML="";
 			var paragrafoStatus=document.createElement("p");
-			paragrafoStatus.innerText = `
-			prediction: ${result.label}\n
-			probability: ${result.confidences[result.label]}
-			`;
-			divStatus.appendChild(paragrafoStatus);
+			paragrafoStatus.innerHTML = "Predição: "+result.label+"<br>Probabilidade: "+result.confidences[result.label];
+			divStatusLeituras.appendChild(imagemAdaptada);
+			divStatusLeituras.appendChild(paragrafoStatus);
 		}
 		//imagemAdaptada.dispose();
 		logits.dispose();
@@ -631,14 +670,16 @@ async function tensorflow_detectarImagem(argImagem,argRelatar=true) {
 
 //DEBUG:
 document.body.onload=async function(){
-	//aplicarNovoLabel("tijolo","#000000",document.getElementById("testeLabel"));
-	//aplicarNovoLabel("cimento","#000000",document.getElementById("testeLabel2"));
-	//aplicarNovoLabel("grama","#000000",document.getElementById("testeLabel3"));
-	//aplicarNovoLabel("gramaSeca","#000000",document.getElementById("testeLabel4"));
-	//aplicarNovoLabel("terra","#000000",document.getElementById("testeLabel5"));
-	//criarNovaAnalise(document.getElementById("testeAnalise"));
-	//criarNovaAnalise(document.getElementById("testeAnalise2"));
-	//criarNovaAnalise(document.getElementById("testeAnalise3"));
-	//criarNovaAnalise(document.getElementById("testeAnalise4"));
+	preload=false;
+	atualizarStatusGeral();
+	aplicarNovoLabel("tijolo","#000000",document.getElementById("testeLabel"));
+	aplicarNovoLabel("cimento","#000000",document.getElementById("testeLabel2"));
+	aplicarNovoLabel("grama","#000000",document.getElementById("testeLabel3"));
+	aplicarNovoLabel("gramaSeca","#000000",document.getElementById("testeLabel4"));
+	aplicarNovoLabel("terra","#000000",document.getElementById("testeLabel5"));
+	criarNovaAnalise(document.getElementById("testeAnalise"));
+	criarNovaAnalise(document.getElementById("testeAnalise2"));
+	criarNovaAnalise(document.getElementById("testeAnalise3"));
+	criarNovaAnalise(document.getElementById("testeAnalise4"));
 	iniciarTensorflow();
 }
