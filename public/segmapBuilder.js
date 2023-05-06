@@ -1,3 +1,6 @@
+//Opções gerais
+apenasQuadrantar=false;
+
 //Cores
 class Cor {
 	r = 0;
@@ -231,8 +234,8 @@ var emProcesso=false;
 var outraVariavel=true;
 var analiseProcessada=0;
 var processoProcessado=0;
-var tamanhoMinimo=2;
-var tamanhoMaximo=32;
+var tamanhoMinimo=16;
+var tamanhoMaximo=64;
 var threadsProcessamento=8;
 var thresholdProcessamento=0;
 class ProcessoAnalise {
@@ -249,10 +252,6 @@ class ProcessoAnalise {
 		this.x2=argX2;
 		this.y2=argY2;
 		this.porcao=argPorcao;
-		//let ctx=this.analiseFoto.canvasLabel.getContext("2d");
-		//ctx.beginPath();
-		//ctx.rect(this.x1,this.y1,this.x2-this.x1,this.y2-this.y1);
-		//ctx.stroke();
 	}
 	quadrantar() {
 		let quadrante1 = new ProcessoAnalise(this.analiseFoto,this.x1                      ,this.y1                      ,this.x1+((this.x2-this.x1)/2),this.y1+((this.y2-this.y1)/2),this.porcao/4);
@@ -264,19 +263,30 @@ class ProcessoAnalise {
 		processosAnalises.push(quadrante3);
 		processosAnalises.push(quadrante4);
 		numProcessosAnalises+=4;
-	}
-	pintar(argCorHex="#FF0000") {
 		let ctx=this.analiseFoto.canvasLabel.getContext("2d");
 		ctx.beginPath();
-		ctx.rect(this.x1,this.y1,this.x2-this.x1,this.y2-this.y1);
-		ctx.fillStyle=argCorHex;
-		ctx.fill();
+		ctx.moveTo(this.x1+((this.x2-this.x1)/2)+0.5,this.y1+0.5);
+		ctx.lineTo(this.x1+((this.x2-this.x1)/2)+0.5,this.y2-0.5);
+		ctx.stroke();
+		ctx.moveTo(this.x1+0.5,this.y1+((this.y2-this.y1)/2)+0.5);
+		ctx.lineTo(this.x2-0.5,this.y1+((this.y2-this.y1)/2)+0.5);
+		//ctx.rect(this.x1+0.5,this.y1+0.5,this.x2-this.x1+0.5,this.y2-this.y1+0.5);
+		ctx.stroke();
+	}
+	pintar(argCorHex="#FF0000") {
+		if (!apenasQuadrantar) {
+			let ctx=this.analiseFoto.canvasLabel.getContext("2d");
+			ctx.beginPath();
+			ctx.fillStyle=argCorHex;
+			ctx.fillRect(this.x1,this.y1,this.x2-this.x1,this.y2-this.y1);
+		}
 		this.analiseFoto.atualizarProgresso(this.porcao);
 	}
 }
 function iniciarProcessamentoTodasAnalises() {
 	if (numAnalises>0) {
 		if (analiseProcessada!=numAnalises) {
+			processosAnalises.length=0;
 			analiseProcessada=0;
 			processoProcessado=0;
 			analises[analiseProcessada].gerarProcesso();
@@ -371,8 +381,8 @@ async function processarProximaAnalise(argThread=0) {
 			}
 			if (argThread==0) {
 				console.log("Threshold zerado. Prosseguindo para o processamento da próxima análise...");
-				analises[analiseProcessada].gerarProcesso();
 				analiseProcessada++;
+				analises[analiseProcessada].gerarProcesso();
 			}
 		}
 	}
@@ -621,14 +631,14 @@ async function tensorflow_detectarImagem(argImagem,argRelatar=true) {
 
 //DEBUG:
 document.body.onload=async function(){
-	aplicarNovoLabel("tijolo","#000000",document.getElementById("testeLabel"));
-	aplicarNovoLabel("cimento","#000000",document.getElementById("testeLabel2"));
-	aplicarNovoLabel("grama","#000000",document.getElementById("testeLabel3"));
-	aplicarNovoLabel("gramaSeca","#000000",document.getElementById("testeLabel4"));
-	aplicarNovoLabel("terra","#000000",document.getElementById("testeLabel5"));
-	criarNovaAnalise(document.getElementById("testeAnalise"));
-	criarNovaAnalise(document.getElementById("testeAnalise2"));
-	criarNovaAnalise(document.getElementById("testeAnalise3"));
-	criarNovaAnalise(document.getElementById("testeAnalise4"));
+	//aplicarNovoLabel("tijolo","#000000",document.getElementById("testeLabel"));
+	//aplicarNovoLabel("cimento","#000000",document.getElementById("testeLabel2"));
+	//aplicarNovoLabel("grama","#000000",document.getElementById("testeLabel3"));
+	//aplicarNovoLabel("gramaSeca","#000000",document.getElementById("testeLabel4"));
+	//aplicarNovoLabel("terra","#000000",document.getElementById("testeLabel5"));
+	//criarNovaAnalise(document.getElementById("testeAnalise"));
+	//criarNovaAnalise(document.getElementById("testeAnalise2"));
+	//criarNovaAnalise(document.getElementById("testeAnalise3"));
+	//criarNovaAnalise(document.getElementById("testeAnalise4"));
 	iniciarTensorflow();
 }
