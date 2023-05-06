@@ -16,7 +16,7 @@ Por utilizar um classificador KNN para cumprir seu propósito, o **Segmap Builde
 
 Vamos supor que iremos analisar esta imagem:
 
-![Imagem a ser analisada](docs\analiseAmostra.png)
+![Imagem a ser analisada](docs/analiseAmostra.png)
 
 Para ela, precisaremos de pelo menos três imagens de amostra, sendo elas:
 |           | Label 1   | Label 2   | Label 3     |
@@ -24,7 +24,7 @@ Para ela, precisaremos de pelo menos três imagens de amostra, sendo elas:
 |**Nome**   | grama     | tijolo    | concreto    |
 |**Cor**    | 0 255 0   | 255 0 0   | 127 127 127 |
 |**Tamanho**| 128 x 128 | 128 x 128 | 256 x 256   |
-|**Imagem** | ![Grama](docs\conceitoGrama.png) | ![Tijolo](docs\conceitoTijolo.png) | ![Concreto](docs\conceitoConcreto.png) |
+|**Imagem** | ![Grama](docs/conceitoGrama.png) | ![Tijolo](docs/conceitoTijolo.png) | ![Concreto](docs/conceitoConcreto.png) |
 
 Durante o processamento, a aplicação divide a imagem em *quadrantes* e aplica o classificador KNN com MobileNets para cada quadrante, usando as imagens de amostra como referência. Caso a probabilidade da predição esteja acima do limiar que o usuário definiu, a aplicação pinta aquele quadrante com a cor do conceito identificado. Caso contrário, o quadrante é dividido em outros quadrantes, para realizar uma detecção mais precisa em cada ponto da imagem, até que todos os quadrantes sejam corretamente identificados ou contemplem o tamanho mínimo.
 
