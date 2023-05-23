@@ -56,19 +56,39 @@
 					<div class="titulo">Configurações</div>
 					<div class="titulo2">Labels</div>
 					<div class="flexForm">
-						<label for="modal_configuracoesNumAmostras">Nº de amostras: </label>
+						<label for="modal_configuracoesNumAmostras">Nº de variações aleatórias por amostra: </label>
+						<input type="number" title="Mais variações podem levar mais tempo de processamento, mas podem garantir mais fidelidade nos resultados." id="modal_configuracoesNumAmostras" min="10" max="200" value="50">
 					</div>
+					<small>Independente deste valor, toda amostra possui variações padrões.</small>
 					<hr>
 					<div class="titulo2">Processamento</div>
 					<div class="flexForm">
 						<label for="modal_configuracoesNumThreads">Nº de threads: </label>
-						<input type="number" id="modal_configuracoesNumThreads" min="1" max="1024" value="8">
+						<input type="number" title="Menos threads deixam o processo mais lento, mas mais fiel. Mais threads aumentam a velocidade, mas podem tornar o sistema irresponsivo." id="modal_configuracoesNumThreads" min="1" max="1024" value="8">
 					</div>
 					<div class="flexForm">
 						<label for="modal_configuracoesTamMin">Tamanho mínimo: </label>
-						<input type="number" id="modal_configuracoesTamMin" min="2" max="32" value="4" step="2">
+						<select id="modal_configuracoesTamMin">
+							<option value="2">2 x 2</option>
+							<option selected value="4">4 x 4</option>
+							<option value="8">8 x 8</option>
+							<option value="16">16 x 16</option>
+							<option value="32">32 x 32</option>
+						</select>
 						<label for="modal_configuracoesTamMax">Tamanho máximo: </label>
-						<input type="number" id="modal_configuracoesTamMax" min="16" max="256" value="64" step="32">
+						<select id="modal_configuracoesTamMax" title="Tamanhos grandes demais podem trazer resultados errôneos para grandes porções das análises.">
+							<option value="8">8 x 8</option>
+							<option value="16">16 x 16</option>
+							<option selected value="32">32 x 32</option>
+							<option value="8">64 x 64</option>
+							<option value="16">128 x 128</option>
+							<option value="32">256 x 256</option>
+						</select>
+					</div>
+					<div class="flexForm">
+						<label for="modal_configuracoesTamMin">Coeficiente de probabilidade: </label>
+						<input type="range" title="Valores abaixo de 10% e acima de 95% não são recomendados, a menos que você saiba o que está fazendo!" id="modal_configuracoesProbabilidade" oninput="mudarTextoElemento(this.nextElementSibling, this.value+'%')" min="1" max="100" value="90">
+						<span id="preview_configuracoesProbabilidade">90%</span>
 					</div>
 					<div class="botoes direita">
 						<button onclick="aplicarConfiguracoes()">Aplicar</button>&ThickSpace;
@@ -116,6 +136,7 @@
 				<img id="testeAnalise2" crossOrigin="Anonymous" src="testeAnalise2.png" style="display:none">
 				<img id="testeAnalise3" crossOrigin="Anonymous" src="testeAnalise3.png" style="display:none">
 				<img id="testeAnalise4" crossOrigin="Anonymous" src="testeAnalise4.png" style="display:none">
+				<img id="testeAnalise5" crossOrigin="Anonymous" src="testeAnalise5.png" style="display:none">
 			</div>
 		</div>
 		<script src="segmapBuilder.js"></script>
