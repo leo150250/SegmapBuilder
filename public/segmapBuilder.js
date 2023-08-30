@@ -473,11 +473,16 @@ function continuarProcessamento() {
 	emProcesso=true;
 	processarProximaAnalise();
 }
+
 //Modal
 const divModal=document.getElementById("modal");
 function exibirModal(argIdModal) {
 	divModal.style.display="flex";
 	let modalAbrir=document.getElementById("modal_"+argIdModal);
+	switch (argIdModal) {
+		case "configuracoes": obterConfiguracoes(); break;
+		default: {}
+	}
 	modalAbrir.classList.add("exibir");
 }
 function sumirModal() {
@@ -592,6 +597,36 @@ function atualizarPreviewModalAnalise() {
 	leitorImagem.readAsDataURL(arquivoImagem);
 	divModal_analiseAmostraImagem.style.display="block";
 }
+//Modal Configurações:
+const inputModal_configuracoesNumAmostras=document.getElementById("modal_configuracoesNumAmostras");
+const inputModal_configuracoesNumThreads=document.getElementById("modal_configuracoesNumThreads");
+const selectModal_configuracoesTamMin=document.getElementById("modal_configuracoesTamMin");
+const selectModal_configuracoesTamMax=document.getElementById("modal_configuracoesTamMax");
+const inputModal_configuracoesProbabilidade=document.getElementById("modal_configuracoesProbabilidade");
+function obterConfiguracoes() {
+	inputModal_configuracoesNumAmostras.value=numAmostrasAleatorias;
+	inputModal_configuracoesNumThreads.value=threadsProcessamento;
+	selectModal_configuracoesTamMin.value=tamanhoMinimo;
+	selectModal_configuracoesTamMax.value=tamanhoMaximo;
+	inputModal_configuracoesProbabilidade.value=coeficienteProbabilidade*100;
+}
+function aplicarConfiguracoes() {
+	numAmostrasAleatorias=parseInt(inputModal_configuracoesNumAmostras.value);
+	threadsProcessamento=parseInt(inputModal_configuracoesNumThreads.value);
+	console.log({selectModal_configuracoesTamMin});
+	console.log({selectModal_configuracoesTamMax});
+	tamanhoMinimo=parseInt(selectModal_configuracoesTamMin.value);
+	tamanhoMaximo=parseInt(selectModal_configuracoesTamMax.value);
+	coeficienteProbabilidade=parseInt(inputModal_configuracoesProbabilidade.value)/100;
+	console.log("Configurações aplicadas!");
+	console.log(numAmostrasAleatorias);
+	console.log(threadsProcessamento);
+	console.log(tamanhoMinimo);
+	console.log(tamanhoMaximo);
+	console.log(coeficienteProbabilidade);
+	sumirModal();
+}
+obterConfiguracoes();
 
 //Status
 const divStatus=document.getElementById("status");
@@ -754,6 +789,10 @@ async function tensorflow_detectarImagem(argImagem,argRelatar=true) {
 document.body.onload=async function(){
 	preload=false;
 	atualizarStatusGeral();
+	//carregarAmostrasExemplo();
+	iniciarTensorflow();
+}
+function carregarAmostrasExemplo() {
 	aplicarNovoLabel("tijolo","#7F0000",document.getElementById("testeLabel"));
 	aplicarNovoLabel("cimento","#7F7F7F",document.getElementById("testeLabel2"));
 	aplicarNovoLabel("grama","#007F00",document.getElementById("testeLabel3"));
@@ -764,5 +803,4 @@ document.body.onload=async function(){
 	criarNovaAnalise(document.getElementById("testeAnalise3"));
 	criarNovaAnalise(document.getElementById("testeAnalise4"));
 	criarNovaAnalise(document.getElementById("testeAnalise5"));
-	iniciarTensorflow();
 }

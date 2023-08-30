@@ -5,7 +5,7 @@ body {
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 fieldset {
-	border: 1px solid #AAA;
+	border: 1px solid #EEE;
 }
 hr {
 	border: none;
@@ -108,6 +108,12 @@ p {
 .flexForm input {
 	flex-grow: 2;
 }
+.flexForm input[type="checkbox"], .flexForm input[type="radio"] {
+	flex-grow: 0;
+} 
+.flexForm input+label {
+	flex-grow: 2;
+}
 #wrapper {
 	width: 100%;
 	height: 100%;
@@ -135,11 +141,13 @@ p {
 }
 #listaLabels fieldset canvas {
 	max-width: 50%;
-	width: 32px;
-	height: 32px;
+	width: 64px;
+	height: 64px;
 	float: left;
 	margin: 0.5em;
 }
+
+canvas {}
 #listaLabels fieldset p {
 	margin: 0em;
 }
@@ -217,4 +225,7 @@ p {
 }
 #modal hr {
 	border-color: #AAF;
+}
+#modal > div.exibir p {
+	contain: inline-size;
 }

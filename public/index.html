@@ -54,14 +54,22 @@
 				</div>
 				<div id="modal_configuracoes">
 					<div class="titulo">Configurações</div>
-					<div class="titulo2">Labels</div>
+					<div class="titulo2">Treino de labels</div>
 					<div class="flexForm">
 						<label for="modal_configuracoesNumAmostras">Nº de variações aleatórias por amostra: </label>
 						<input type="number" title="Mais variações podem levar mais tempo de processamento, mas podem garantir mais fidelidade nos resultados." id="modal_configuracoesNumAmostras" min="10" max="200" value="50">
 					</div>
-					<small>Independente deste valor, toda amostra possui variações padrões.</small>
+					<fieldset>
+						<legend>Tipo de variações aleatórias:</legend>
+						<div class="flexForm">
+							<input type="checkbox" title="Rotaciona as amostras aleatoriamente em ângulos múltiplos de 45°." id="modal_configuracoesVarRotacao" checked><label for="modal_configuracoesVarRotacao">Rotações</label>
+							<input type="checkbox" title="Escalona um pouco as amostras a cada variação." id="modal_configuracoesVarEscala" checked><label for="modal_configuracoesVarRotacao">Escalonamentos</label>
+							<input type="checkbox" title="Desloca as posições X e Y de cada amostra. * Possui efeito maior se a amostra for escalonada." id="modal_configuracoesVarDeslocamento" checked><label for="modal_configuracoesVarDeslocamento">Deslocamentos</label>
+						</div>	
+					</fieldset>
+					<p><small>Independente da quantidade de variações, toda amostra possui algumas poucas variações padrões, de acordo com as definições de variações selecionadas.</small></p>
 					<hr>
-					<div class="titulo2">Processamento</div>
+					<div class="titulo2">Processamento das análises</div>
 					<div class="flexForm">
 						<label for="modal_configuracoesNumThreads">Nº de threads: </label>
 						<input type="number" title="Menos threads deixam o processo mais lento, mas mais fiel. Mais threads aumentam a velocidade, mas podem tornar o sistema irresponsivo." id="modal_configuracoesNumThreads" min="1" max="1024" value="8">
@@ -74,19 +82,22 @@
 							<option value="8">8 x 8</option>
 							<option value="16">16 x 16</option>
 							<option value="32">32 x 32</option>
+							<option value="64">64 x 64</option>
+							<option value="128">128 x 128</option>
 						</select>
 						<label for="modal_configuracoesTamMax">Tamanho máximo: </label>
 						<select id="modal_configuracoesTamMax" title="Tamanhos grandes demais podem trazer resultados errôneos para grandes porções das análises.">
 							<option value="8">8 x 8</option>
 							<option value="16">16 x 16</option>
 							<option selected value="32">32 x 32</option>
-							<option value="8">64 x 64</option>
-							<option value="16">128 x 128</option>
-							<option value="32">256 x 256</option>
+							<option value="64">64 x 64</option>
+							<option value="128">128 x 128</option>
+							<option value="256">256 x 256</option>
+							<option value="512">512 x 512</option>
 						</select>
 					</div>
 					<div class="flexForm">
-						<label for="modal_configuracoesTamMin">Coeficiente de probabilidade: </label>
+						<label for="modal_configuracoesProbabilidade">Coeficiente de probabilidade: </label>
 						<input type="range" title="Valores abaixo de 10% e acima de 95% não são recomendados, a menos que você saiba o que está fazendo!" id="modal_configuracoesProbabilidade" oninput="mudarTextoElemento(this.nextElementSibling, this.value+'%')" min="1" max="100" value="90">
 						<span id="preview_configuracoesProbabilidade">90%</span>
 					</div>
@@ -105,6 +116,8 @@
 				<button onclick="pausarProcessamento()">Pausar</button>
 				<button onclick="continuarProcessamento()">Continuar</button>
 				<button onclick="processarProximaAnalise()">Processar próximo</button>
+				<hr>
+				<button onclick="carregarAmostrasExemplo()">Carregar exemplo</button>
 			</div>
 			<div id="labels" class="controle">
 				<div class="titulo">Labels</div>
@@ -140,5 +153,8 @@
 			</div>
 		</div>
 		<script src="segmapBuilder.js"></script>
+		<script>
+			exibirModal("configuracoes");
+		</script>
 	</body>
 </html>
