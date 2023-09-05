@@ -6,6 +6,9 @@ var numAmostrasAleatorias=50;
 var emProcesso=false;
 var tamanhoMinimo=4;
 var tamanhoMaximo=32;
+var varRotacao=true;
+var varEscala=true;
+var varDeslocamento=true;
 var threadsProcessamento=8;
 var coeficienteProbabilidade=0.9;
 
@@ -599,12 +602,18 @@ function atualizarPreviewModalAnalise() {
 }
 //Modal Configurações:
 const inputModal_configuracoesNumAmostras=document.getElementById("modal_configuracoesNumAmostras");
+const inputModal_configuracoesVarRotacao=document.getElementById("modal_configuracoesVarRotacao");
+const inputModal_configuracoesVarEscala=document.getElementById("modal_configuracoesVarEscala");
+const inputModal_configuracoesVarDeslocamento=document.getElementById("modal_configuracoesVarDeslocamento");
 const inputModal_configuracoesNumThreads=document.getElementById("modal_configuracoesNumThreads");
 const selectModal_configuracoesTamMin=document.getElementById("modal_configuracoesTamMin");
 const selectModal_configuracoesTamMax=document.getElementById("modal_configuracoesTamMax");
 const inputModal_configuracoesProbabilidade=document.getElementById("modal_configuracoesProbabilidade");
 function obterConfiguracoes() {
 	inputModal_configuracoesNumAmostras.value=numAmostrasAleatorias;
+	inputModal_configuracoesVarRotacao.checked=varRotacao;
+	inputModal_configuracoesVarEscala.checked=varEscala;
+	inputModal_configuracoesVarDeslocamento.checked=varDeslocamento;
 	inputModal_configuracoesNumThreads.value=threadsProcessamento;
 	selectModal_configuracoesTamMin.value=tamanhoMinimo;
 	selectModal_configuracoesTamMax.value=tamanhoMaximo;
@@ -612,6 +621,9 @@ function obterConfiguracoes() {
 }
 function aplicarConfiguracoes() {
 	numAmostrasAleatorias=parseInt(inputModal_configuracoesNumAmostras.value);
+	varRotacao=inputModal_configuracoesVarRotacao.checked;
+	varEscala=inputModal_configuracoesVarEscala.checked;
+	varDeslocamento=inputModal_configuracoesVarDeslocamento.checked;
 	threadsProcessamento=parseInt(inputModal_configuracoesNumThreads.value);
 	console.log({selectModal_configuracoesTamMin});
 	console.log({selectModal_configuracoesTamMax});
