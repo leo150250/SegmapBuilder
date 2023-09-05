@@ -4,9 +4,18 @@ var preload=true;
 var maximoClassificacoes=10;
 var numAmostrasAleatorias=50;
 var emProcesso=false;
-var tamanhoMinimo=16;
-var tamanhoMaximo=64;
+var tamanhoMinimo=4;
+var tamanhoMaximo=32;
+var varRotacao=true;
+var varEscala=true;
+var varDeslocamento=true;
 var threadsProcessamento=8;
+var coeficienteProbabilidade=0.9;
+
+//Funções gerais
+function mudarTextoElemento(argElemento,argTexto) {
+	argElemento.innerHTML=argTexto;
+}
 
 //Cores
 class Cor {
@@ -177,6 +186,12 @@ class Analise {
 	progresso=null;
 	imagemAnalise=null;
 	valorProgresso=0;
+	momentoInicio=0;
+	momentoFim=0;
+	duracao=0;
+	divStatus=null;
+	emExecucao=false;
+	numQuadrantes=0;
 	constructor(argFoto) {
 		this.criarDiv();
 		this.preencherFotoAnalise(argFoto);
@@ -195,9 +210,12 @@ class Analise {
 		this.progresso=document.createElement("progress");
 		this.progresso.max=100;
 		this.progresso.value=0;
+		this.divStatus=document.createElement("div");
+		this.atualizarStatus();
 		this.divAnalise.appendChild(this.canvasFoto);
 		this.divAnalise.appendChild(this.canvasLabel);
 		this.divAnalise.appendChild(this.progresso);
+		this.divAnalise.appendChild(this.divStatus);
 	}
 	preencherFotoAnalise(argFoto) {
 		if (this.divAnalise!=null) {
@@ -219,11 +237,45 @@ class Analise {
 	atualizarProgresso(argQtd) {
 		this.valorProgresso+=argQtd;
 		this.progresso.value=this.valorProgresso;
+		this.atualizarStatus();
+	}
+	atualizarStatus() {
+		let texto="Estado: ";
+		if (this.emExecucao) {
+			texto+=" Em execução";
+		} else {
+			texto+=" Parado";
+		}
+		if ((this.emExecucao) || (this.momentoFim!=0)) {
+			texto+=" | Tempo total: "+this.obterDuracao() + " s";
+		}
+		if (this.numQuadrantes>0) {
+			texto+=" | Num. quadrantes: "+this.numQuadrantes;
+		}
+		this.divStatus.innerHTML=texto;
 	}
 	gerarProcesso() {
 		let novoProcessoAnalise = new ProcessoAnalise(this,0,0,this.canvasFoto.width,this.canvasFoto.height,100);
 		processosAnalises.push(novoProcessoAnalise);
 		numProcessosAnalises++;
+		this.momentoInicio=Date.now();
+		this.momentoFim=0;
+		this.emExecucao=true;
+		this.atualizarStatus();
+	}
+	finalizarProcesso() {
+		this.momentoFim=Date.now();
+		this.emExecucao=false;
+		this.atualizarStatus();
+	}
+	obterDuracao() {
+		if (this.momentoFim==0) {
+			this.duracao=Date.now()-this.momentoInicio;
+		} else {
+			this.duracao=this.momentoFim-this.momentoInicio;
+		}
+		let segundos = this.duracao/1000;
+		return segundos.toFixed(1);
 	}
 }
 function criarNovaAnalise(argFoto) {
@@ -252,6 +304,7 @@ class ProcessoAnalise {
 	porcao=0;
 	constructor(argAnalise,argX1,argY1,argX2,argY2,argPorcao) {
 		this.analiseFoto=argAnalise;
+		this.analiseFoto.numQuadrantes++;
 		this.x1=argX1;
 		this.y1=argY1;
 		this.x2=argX2;
@@ -344,7 +397,7 @@ async function processarProximaAnalise(argThread=0) {
 				altura);
 			//divStatus.appendChild(canvasProcessado);
 			resultado = await tensorflow_detectarImagem(canvasProcessado,(argThread==0));
-			if (resultado.confidences[resultado.label]<1) {
+			if (resultado.confidences[resultado.label]<coeficienteProbabilidade) {
 				if ((largura>tamanhoMinimo)
 				|| (altura>tamanhoMinimo)) {
 					processoAtual.quadrantar();
@@ -386,6 +439,7 @@ async function processarProximaAnalise(argThread=0) {
 		if (argThread==0) {
 			processosProntos=0;
 			processosContinuar=threadsProcessamento-1;
+			analises[analiseProcessada].finalizarProcesso();
 			analiseProcessada++;
 			if (analiseProcessada>=numAnalises) {
 				emProcesso=false;
@@ -422,11 +476,16 @@ function continuarProcessamento() {
 	emProcesso=true;
 	processarProximaAnalise();
 }
+
 //Modal
 const divModal=document.getElementById("modal");
 function exibirModal(argIdModal) {
 	divModal.style.display="flex";
 	let modalAbrir=document.getElementById("modal_"+argIdModal);
+	switch (argIdModal) {
+		case "configuracoes": obterConfiguracoes(); break;
+		default: {}
+	}
 	modalAbrir.classList.add("exibir");
 }
 function sumirModal() {
@@ -541,6 +600,45 @@ function atualizarPreviewModalAnalise() {
 	leitorImagem.readAsDataURL(arquivoImagem);
 	divModal_analiseAmostraImagem.style.display="block";
 }
+//Modal Configurações:
+const inputModal_configuracoesNumAmostras=document.getElementById("modal_configuracoesNumAmostras");
+const inputModal_configuracoesVarRotacao=document.getElementById("modal_configuracoesVarRotacao");
+const inputModal_configuracoesVarEscala=document.getElementById("modal_configuracoesVarEscala");
+const inputModal_configuracoesVarDeslocamento=document.getElementById("modal_configuracoesVarDeslocamento");
+const inputModal_configuracoesNumThreads=document.getElementById("modal_configuracoesNumThreads");
+const selectModal_configuracoesTamMin=document.getElementById("modal_configuracoesTamMin");
+const selectModal_configuracoesTamMax=document.getElementById("modal_configuracoesTamMax");
+const inputModal_configuracoesProbabilidade=document.getElementById("modal_configuracoesProbabilidade");
+function obterConfiguracoes() {
+	inputModal_configuracoesNumAmostras.value=numAmostrasAleatorias;
+	inputModal_configuracoesVarRotacao.checked=varRotacao;
+	inputModal_configuracoesVarEscala.checked=varEscala;
+	inputModal_configuracoesVarDeslocamento.checked=varDeslocamento;
+	inputModal_configuracoesNumThreads.value=threadsProcessamento;
+	selectModal_configuracoesTamMin.value=tamanhoMinimo;
+	selectModal_configuracoesTamMax.value=tamanhoMaximo;
+	inputModal_configuracoesProbabilidade.value=coeficienteProbabilidade*100;
+}
+function aplicarConfiguracoes() {
+	numAmostrasAleatorias=parseInt(inputModal_configuracoesNumAmostras.value);
+	varRotacao=inputModal_configuracoesVarRotacao.checked;
+	varEscala=inputModal_configuracoesVarEscala.checked;
+	varDeslocamento=inputModal_configuracoesVarDeslocamento.checked;
+	threadsProcessamento=parseInt(inputModal_configuracoesNumThreads.value);
+	console.log({selectModal_configuracoesTamMin});
+	console.log({selectModal_configuracoesTamMax});
+	tamanhoMinimo=parseInt(selectModal_configuracoesTamMin.value);
+	tamanhoMaximo=parseInt(selectModal_configuracoesTamMax.value);
+	coeficienteProbabilidade=parseInt(inputModal_configuracoesProbabilidade.value)/100;
+	console.log("Configurações aplicadas!");
+	console.log(numAmostrasAleatorias);
+	console.log(threadsProcessamento);
+	console.log(tamanhoMinimo);
+	console.log(tamanhoMaximo);
+	console.log(coeficienteProbabilidade);
+	sumirModal();
+}
+obterConfiguracoes();
 
 //Status
 const divStatus=document.getElementById("status");
@@ -614,27 +712,73 @@ async function tensorflow_adicionarAmostra(argLabel) {
 	imagemAdaptada.height=224;
 	divStatusLeituras.appendChild(imagemAdaptada);
 	let ctx = imagemAdaptada.getContext("2d");
-	ctx.drawImage(argLabel.imagemLabel,0,0,224,224);
+	//Adiciona a imagem original
+	ctx.drawImage(argLabel.imagemLabel,0,0,imagemAdaptada.width,imagemAdaptada.height);
 	const logits = await MBNET.infer(imagemAdaptada, true);
 	await KNN.addExample(logits, argLabel.nomeLabel);
 	logits.dispose();
-	//Aleatoriza a imagem de amostra, pra gerar material pra teste
-	let i=0;
+	let i=-8;
 	let carregamento=setInterval(function(){
-		if (i<numAmostrasAleatorias) {
-			ctx.drawImage(argLabel.imagemLabel,0-Math.random()*i,0-Math.random()*i,224+i+Math.random()*i,224+i+Math.random()*i);
-			//Adiciona o exemplo no knn
+		if (i<0) {
+			//Atribui variações
+			ctx.clearRect(0, 0, imagemAdaptada.width, imagemAdaptada.height);
+			let angulo=0;
+			if (varRotacao) {
+				angulo=-i * 45;
+			}
+			let escala=1;
+			ctx.save();
+			ctx.translate(imagemAdaptada.width / 2, imagemAdaptada.height / 2);
+			ctx.rotate(angulo * Math.PI / 180);
+			//ctx.drawImage(image, -image.width / 2, -image.height / 2);
+			if (angulo%90 == 45) {
+				escala=1.5;
+			}
+			ctx.drawImage(argLabel.imagemLabel,-(imagemAdaptada.width / 2)*escala,-(imagemAdaptada.height / 2)*escala,imagemAdaptada.width*escala,imagemAdaptada.height*escala);
+			ctx.restore();
 			const logits = MBNET.infer(imagemAdaptada, true);
-			//logits.print(true);
 			KNN.addExample(logits, argLabel.nomeLabel);
-			//imagemAdaptada.dispose();
 			logits.dispose();
 			i++;
 		} else {
-			clearInterval(carregamento);
-			console.log("Label "+argLabel.nomeLabel+" carregado");
-			amostrasCarregadasTensorflow++;
-			atualizarStatusGeral();
+			//Atribui variações aleatórias
+			if (i<numAmostrasAleatorias) {
+				ctx.clearRect(0, 0, imagemAdaptada.width, imagemAdaptada.height);
+				let angulo=0;
+				if (varRotacao) {
+					angulo=(Math.floor(Math.random() * 8)) * 45;
+				}
+				let escala=1;
+				if (varEscala) {
+					escala=1+(i/100);
+				}
+				if (angulo%90 == 45) {
+					escala+=0.5;
+				}
+				ctx.save();
+				ctx.translate(imagemAdaptada.width / 2, imagemAdaptada.height / 2);
+				ctx.rotate(angulo * Math.PI / 180);
+				let deslocamentoX = -(imagemAdaptada.width / 2)*escala;
+				let deslocamentoY = -(imagemAdaptada.height / 2)*escala;
+				if (varDeslocamento) {
+					deslocamentoX = -(imagemAdaptada.width / 2)*escala + (-i+(Math.random() * (i * 2)));
+					deslocamentoY = -(imagemAdaptada.height / 2)*escala + (-i+(Math.random() * (i * 2)));
+				}
+				ctx.drawImage(argLabel.imagemLabel,deslocamentoX,deslocamentoY,imagemAdaptada.width*escala,imagemAdaptada.height*escala);
+				ctx.restore();
+				//Adiciona o exemplo no knn
+				const logits = MBNET.infer(imagemAdaptada, true);
+				//logits.print(true);
+				KNN.addExample(logits, argLabel.nomeLabel);
+				//imagemAdaptada.dispose();
+				logits.dispose();
+				i++;
+			} else {
+				clearInterval(carregamento);
+				console.log("Label "+argLabel.nomeLabel+" carregado");
+				amostrasCarregadasTensorflow++;
+				atualizarStatusGeral();
+			}
 		}
 	},1);
 	//divStatus.appendChild(argLabel.imagem);
@@ -672,14 +816,18 @@ async function tensorflow_detectarImagem(argImagem,argRelatar=true) {
 document.body.onload=async function(){
 	preload=false;
 	atualizarStatusGeral();
-	aplicarNovoLabel("tijolo","#000000",document.getElementById("testeLabel"));
-	aplicarNovoLabel("cimento","#000000",document.getElementById("testeLabel2"));
-	aplicarNovoLabel("grama","#000000",document.getElementById("testeLabel3"));
-	aplicarNovoLabel("gramaSeca","#000000",document.getElementById("testeLabel4"));
-	aplicarNovoLabel("terra","#000000",document.getElementById("testeLabel5"));
+	//carregarAmostrasExemplo();
+	iniciarTensorflow();
+}
+function carregarAmostrasExemplo() {
+	aplicarNovoLabel("tijolo","#7F0000",document.getElementById("testeLabel"));
+	aplicarNovoLabel("cimento","#7F7F7F",document.getElementById("testeLabel2"));
+	aplicarNovoLabel("grama","#007F00",document.getElementById("testeLabel3"));
+	aplicarNovoLabel("gramaSeca","#7F7F00",document.getElementById("testeLabel4"));
+	aplicarNovoLabel("terra","#7F4000",document.getElementById("testeLabel5"));
 	criarNovaAnalise(document.getElementById("testeAnalise"));
 	criarNovaAnalise(document.getElementById("testeAnalise2"));
 	criarNovaAnalise(document.getElementById("testeAnalise3"));
 	criarNovaAnalise(document.getElementById("testeAnalise4"));
-	iniciarTensorflow();
+	criarNovaAnalise(document.getElementById("testeAnalise5"));
 }

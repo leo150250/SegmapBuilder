@@ -5,7 +5,7 @@ body {
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 fieldset {
-	border: 1px solid #AAA;
+	border: 1px solid #EEE;
 }
 hr {
 	border: none;
@@ -36,7 +36,7 @@ button:hover {
 button:active {
 	background-color: #66B;
 }
-input {
+input, select {
 	border: 1px solid #AAF;
 	font-size: 1em;
 	padding: 0.5em;
@@ -85,6 +85,17 @@ p {
 	border-bottom: 1px solid #DDD;
 	margin-bottom: 0.5rem;
 }
+.titulo2 {
+	width: calc(100% - 2px);
+	height: 1rem;
+	font-size: 0.75em;
+	background: linear-gradient(to left, #EEE0, #EEEF);
+	padding-left: 1em;
+	padding-right: 1em;
+	margin-top: 0rem;
+	/* border-bottom: 1px solid #DDD; */
+	margin-bottom: 0.5rem;
+}
 .flexForm {
 	display: flex;
 	flex-wrap: wrap;
@@ -95,6 +106,12 @@ p {
 	margin-inline-end: 0.5em;
 }
 .flexForm input {
+	flex-grow: 2;
+}
+.flexForm input[type="checkbox"], .flexForm input[type="radio"] {
+	flex-grow: 0;
+} 
+.flexForm input+label {
 	flex-grow: 2;
 }
 #wrapper {
@@ -124,11 +141,13 @@ p {
 }
 #listaLabels fieldset canvas {
 	max-width: 50%;
-	width: 32px;
-	height: 32px;
+	width: 64px;
+	height: 64px;
 	float: left;
 	margin: 0.5em;
 }
+
+canvas {}
 #listaLabels fieldset p {
 	margin: 0em;
 }
@@ -194,9 +213,19 @@ p {
 	display: none;
 }
 #modal > div .titulo {
-	margin-left: -0.5em;
-	width: calc(100% - 1em);
+	margin-left: -0.5rem;
+	width: calc(100% - 0.5rem);
+}
+#modal > div .titulo2 {
+	margin-left: -0.5rem;
+	width: calc(100% - 0.5rem);
 }
 #modal > div.exibir {
 	display: block;
+}
+#modal hr {
+	border-color: #AAF;
+}
+#modal > div.exibir p {
+	contain: inline-size;
 }
