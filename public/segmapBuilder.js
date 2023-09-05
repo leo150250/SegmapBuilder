@@ -720,9 +720,12 @@ async function tensorflow_adicionarAmostra(argLabel) {
 	let i=-8;
 	let carregamento=setInterval(function(){
 		if (i<0) {
-			//Atribui variações padrões (rotacao e escala)
+			//Atribui variações
 			ctx.clearRect(0, 0, imagemAdaptada.width, imagemAdaptada.height);
-			let angulo=-i * 45;
+			let angulo=0;
+			if (varRotacao) {
+				angulo=-i * 45;
+			}
 			let escala=1;
 			ctx.save();
 			ctx.translate(imagemAdaptada.width / 2, imagemAdaptada.height / 2);
@@ -741,15 +744,27 @@ async function tensorflow_adicionarAmostra(argLabel) {
 			//Atribui variações aleatórias
 			if (i<numAmostrasAleatorias) {
 				ctx.clearRect(0, 0, imagemAdaptada.width, imagemAdaptada.height);
-				let angulo=(Math.floor(Math.random() * 8)) * 45;
-				let escala=1+(i/100);
+				let angulo=0;
+				if (varRotacao) {
+					angulo=(Math.floor(Math.random() * 8)) * 45;
+				}
+				let escala=1;
+				if (varEscala) {
+					escala=1+(i/100);
+				}
 				if (angulo%90 == 45) {
 					escala+=0.5;
 				}
 				ctx.save();
 				ctx.translate(imagemAdaptada.width / 2, imagemAdaptada.height / 2);
-				ctx.rotate(angulo * Math.PI / 180);	
-				ctx.drawImage(argLabel.imagemLabel,-(imagemAdaptada.width / 2)*escala + (-i+(Math.random() * (i * 2))),-(imagemAdaptada.height / 2)*escala + (-i+(Math.random() * (i * 2))),imagemAdaptada.width*escala,imagemAdaptada.height*escala);
+				ctx.rotate(angulo * Math.PI / 180);
+				let deslocamentoX = -(imagemAdaptada.width / 2)*escala;
+				let deslocamentoY = -(imagemAdaptada.height / 2)*escala;
+				if (varDeslocamento) {
+					deslocamentoX = -(imagemAdaptada.width / 2)*escala + (-i+(Math.random() * (i * 2)));
+					deslocamentoY = -(imagemAdaptada.height / 2)*escala + (-i+(Math.random() * (i * 2)));
+				}
+				ctx.drawImage(argLabel.imagemLabel,deslocamentoX,deslocamentoY,imagemAdaptada.width*escala,imagemAdaptada.height*escala);
 				ctx.restore();
 				//Adiciona o exemplo no knn
 				const logits = MBNET.infer(imagemAdaptada, true);
