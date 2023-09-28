@@ -1,3 +1,6 @@
+//Constantes
+const input_autoFocoProcessamento = document.getElementById("autoFocoProcessamento");
+
 //Opções gerais
 var apenasQuadrantar=false;
 var preload=true;
@@ -315,6 +318,9 @@ class Analise {
 		this.emExecucao=true;
 		this.atualizarStatus();
 		this.buttonOneChannel.disabled = true;
+		if (input_autoFocoProcessamento.checked) {
+			this.divAnalise.scrollIntoView({behavior: "smooth", block: "center", inline: "center"});
+		}
 	}
 	finalizarProcesso() {
 		this.momentoFim=Date.now();
