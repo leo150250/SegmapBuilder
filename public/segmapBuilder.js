@@ -1,3 +1,6 @@
+//Constantes
+const input_autoFocoProcessamento = document.getElementById("autoFocoProcessamento");
+
 //Opções gerais
 var apenasQuadrantar=false;
 var preload=true;
@@ -219,6 +222,9 @@ class Analise {
 		this.progresso.value=0;
 		this.divStatus=document.createElement("div");
 		this.atualizarStatus();
+		this.identificador=document.createElement("div");
+		this.identificador.classList.add("analise_id");
+		this.identificador.innerHTML="#"+numAnalises.toString();
 		this.divBotoes=document.createElement("div");
 		this.divBotoes.classList.add("analise_botoes");
 		this.buttonFechar = document.createElement("button");
@@ -238,6 +244,7 @@ class Analise {
 		this.divAnalise.appendChild(this.oneChannel);
 		this.divAnalise.appendChild(this.progresso);
 		this.divAnalise.appendChild(this.divStatus);
+		this.divAnalise.appendChild(this.identificador);
 		this.divAnalise.appendChild(this.divBotoes);
 	}
 	preencherFotoAnalise(argFoto) {
@@ -315,6 +322,9 @@ class Analise {
 		this.emExecucao=true;
 		this.atualizarStatus();
 		this.buttonOneChannel.disabled = true;
+		if (input_autoFocoProcessamento.checked) {
+			this.divAnalise.scrollIntoView({behavior: "smooth", block: "center", inline: "center"});
+		}
 	}
 	finalizarProcesso() {
 		this.momentoFim=Date.now();
