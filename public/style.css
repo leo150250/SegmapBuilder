@@ -244,6 +244,15 @@ p {
 #listaAnalises div.analise_botoes button {
 	font-size: 0.75em;
 }
+#listaAnalises div.analise div.analise_id {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	background-color: #F8F8F8;
+	padding: 0.2rem 0.5rem;
+	border-right: 3px solid #AAF;
+	font-size: 0.5em;
+}
 #modal {
 	background-color: #FFFB;
 	width: 100%;
@@ -280,4 +289,4 @@ p {
 }
 #modal > div.exibir p {
 	contain: inline-size;
-}
+}}
