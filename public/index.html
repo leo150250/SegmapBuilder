@@ -24,9 +24,9 @@
 					</div>
 					<div class="flexForm">
 						<label for="modal_labelImagem">Imagem de amostra: </label>
-						<input type="file" id="modal_labelImagem" onchange="atualizarPreviewModalLabel()">
+						<input type="file" id="modal_labelImagem" onchange="atualizarPreviewModalLabel()" multiple accept="image/*">
 					</div>
-					<div id="modal_labelAmostraImagem" class="previewer" style="display: none">
+					<div id="modal_labelAmostraImagem" class="previewer" style="display: none; text-align: center; text-wrap: wrap;">
 						<hr>
 						<img src="#" class="imagemLabel" id="modal_labelPreview">
 						<hr>
