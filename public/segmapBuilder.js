@@ -565,7 +565,7 @@ const inputModal_labelNome=document.getElementById("modal_labelNome");
 const inputModal_labelCor=document.getElementById("modal_labelCor");
 const inputModal_labelImagem=document.getElementById("modal_labelImagem");
 const divModal_labelAmostraImagem=document.getElementById("modal_labelAmostraImagem");
-const imgModal_labelPreview=document.getElementById("modal_labelPreview");
+//const imgModal_labelPreview=document.getElementById("modal_labelPreview");
 function aplicarNovoLabel(argNome=inputModal_labelNome.value, argCor=inputModal_labelCor.value, argImagem=inputModal_labelImagem) {
 	let nomeLabel=argNome;
 	if (nomeLabel=="") {
@@ -577,30 +577,38 @@ function aplicarNovoLabel(argNome=inputModal_labelNome.value, argCor=inputModal_
 	} else {
 		corLabel=new Cor(argCor);
 	}
-	//Cria o novo label
-	let novoLabel=criarNovoLabel(nomeLabel);
-	novoLabel.definirCor(corLabel.hex());
 	let imagemLabel=null;
 	//Adiciona a imagem à label, independente se ela vier de um input (adicionada pela GUI) ou de um img (pré-adicionada na página, pra fins de teste)
 	switch (argImagem.tagName) {
 		case "INPUT": {
-			let arquivoImagem = argImagem.files[0];
-			let leitorImagem = new FileReader();
-			leitorImagem.onload = function(e) {
-				let novaImagem = new Image();
-				novaImagem.onload=function() {
-					novoLabel.definirImagem(novaImagem);
-					if (tensorFlowIniciado) {
-						tensorflow_adicionarAmostra(novoLabel);
+			numImagens=argImagem.files.length;
+			for (let i=0; i<numImagens; i++) {
+				//Cria o novo label
+				let novoLabel=criarNovoLabel(nomeLabel);
+				novoLabel.definirCor(corLabel.hex());
+				//Cria o leitor
+				let leitorImagem = new FileReader();
+				leitorImagem.onload = function(e) {
+					let novaImagem = new Image();
+					novaImagem.onload=function() {
+						novoLabel.definirImagem(novaImagem);
+						if (tensorFlowIniciado) {
+							tensorflow_adicionarAmostra(novoLabel);
+						}
 					}
+					novaImagem.src=e.target.result;
 				}
-				novaImagem.src=e.target.result;
-			}
-			if (arquivoImagem!=null) {
-				leitorImagem.readAsDataURL(arquivoImagem);
+				let arquivoImagem = argImagem.files[i];
+				if (arquivoImagem!=null) {
+					console.log(argImagem.files[i]);
+					leitorImagem.readAsDataURL(arquivoImagem);
+				}
 			}
 		} break;
 		case "IMG": {
+			//Cria o novo label
+			let novoLabel=criarNovoLabel(nomeLabel);
+			novoLabel.definirCor(corLabel.hex());
 			novoLabel.definirImagem(argImagem);
 			if (tensorFlowIniciado) {
 				tensorflow_adicionarAmostra(novoLabel);
@@ -610,33 +618,46 @@ function aplicarNovoLabel(argNome=inputModal_labelNome.value, argCor=inputModal_
 	sumirModal();
 }
 function atualizarPreviewModalLabel() {
-	let arquivoImagem = inputModal_labelImagem.files[0];
-	let leitorImagem = new FileReader();
-	leitorImagem.onload = function(e) {
-		imgModal_labelPreview.src=e.target.result;
+	divModal_labelAmostraImagem.innerHTML="";
+	divModal_labelAmostraImagem.style.display="none";
+	divModal_labelAmostraImagem.appendChild(document.createElement("hr"));
+	let numArquivos = inputModal_labelImagem.files.length;
+	for (let i = 0; i < numArquivos; i++) {
+		let novoImg = document.createElement("img");
+		novoImg.classList.add("imagemLabel");
+		let arquivoImagem = inputModal_labelImagem.files[i];
+		let leitorImagem = new FileReader();
+		leitorImagem.onload = function(e) {
+			novoImg.src=e.target.result;
+		}
+		leitorImagem.readAsDataURL(arquivoImagem);
+		divModal_labelAmostraImagem.appendChild(novoImg);
 	}
-	leitorImagem.readAsDataURL(arquivoImagem);
+	divModal_labelAmostraImagem.appendChild(document.createElement("hr"));
 	divModal_labelAmostraImagem.style.display="block";
 }
 //Modal Analise:
 const inputModal_analiseImagem=document.getElementById("modal_analiseImagem");
 const divModal_analiseAmostraImagem=document.getElementById("modal_analiseAmostraImagem");
-const imgModal_analisePreview=document.getElementById("modal_analisePreview");
+//const imgModal_analisePreview=document.getElementById("modal_analisePreview");
 function aplicarNovaAnalise(argImagem=inputModal_analiseImagem) {
 	let novaAnalise=null;
 	switch (argImagem.tagName) {
 		case "INPUT": {
-			let arquivoImagem = argImagem.files[0];
-			let leitorImagem = new FileReader();
-			leitorImagem.onload = function(e) {
-				let novaImagem = new Image();
-				novaImagem.onload=function() {
-					novaAnalise=criarNovaAnalise(novaImagem);
+			let numAnalises = argImagem.files.length;
+			for (let i = 0; i < numAnalises; i++) {
+				let arquivoImagem = argImagem.files[i];
+				let leitorImagem = new FileReader();
+				leitorImagem.onload = function(e) {
+					let novaImagem = new Image();
+					novaImagem.onload=function() {
+						novaAnalise=criarNovaAnalise(novaImagem);
+					}
+					novaImagem.src=e.target.result;
 				}
-				novaImagem.src=e.target.result;
-			}
-			if (arquivoImagem!=null) {
-				leitorImagem.readAsDataURL(arquivoImagem);
+				if (arquivoImagem!=null) {
+					leitorImagem.readAsDataURL(arquivoImagem);
+				}
 			}
 		} break;
 		case "IMG": {
@@ -646,12 +667,22 @@ function aplicarNovaAnalise(argImagem=inputModal_analiseImagem) {
 	sumirModal();
 }
 function atualizarPreviewModalAnalise() {
-	let arquivoImagem = inputModal_analiseImagem.files[0];
-	let leitorImagem = new FileReader();
-	leitorImagem.onload = function(e) {
-		imgModal_analisePreview.src=e.target.result;
+	divModal_analiseAmostraImagem.innerHTML="";
+	divModal_analiseAmostraImagem.style.display="none";
+	divModal_analiseAmostraImagem.appendChild(document.createElement("hr"));
+	let numArquivos = inputModal_analiseImagem.files.length;
+	for (let i = 0; i < numArquivos; i++) {
+		let novoImg = document.createElement("img");
+		novoImg.classList.add("imagemAnalise");
+		let arquivoImagem = inputModal_analiseImagem.files[i];
+		let leitorImagem = new FileReader();
+		leitorImagem.onload = function(e) {
+			novoImg.src=e.target.result;
+		}
+		leitorImagem.readAsDataURL(arquivoImagem);
+		divModal_analiseAmostraImagem.appendChild(novoImg);
 	}
-	leitorImagem.readAsDataURL(arquivoImagem);
+	divModal_analiseAmostraImagem.appendChild(document.createElement("hr"));
 	divModal_analiseAmostraImagem.style.display="block";
 }
 //Modal Configurações:

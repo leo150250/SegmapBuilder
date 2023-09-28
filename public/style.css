@@ -51,14 +51,14 @@ input[type="color"] {
 	padding: initial;
 }
 img.imagemLabel {
-	margin: 0px auto;
-	display: block;
+	margin: 1px;
+	display: inline-block;
 	width: 64px;
 	height: 64px;
 }
 img.imagemAnalise {
-	margin: 0px auto;
-	display: block;
+	margin: 1px;
+	display: inline-block;
 	width: 256px;
 	height: 256px;
 }
@@ -162,6 +162,7 @@ p {
 	z-index: 9;
 	border-left: 1px solid #AAF;
 	height: calc(100% - 2em);
+	overflow-y: scroll;
 }
 #status canvas {
 	width: 90%;
