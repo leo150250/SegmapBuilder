@@ -23,10 +23,10 @@
 						</div>
 					</div>
 					<div class="flexForm">
-						<label for="modal_labelImagem">Imagem de amostra: </label>
-						<input type="file" id="modal_labelImagem" onchange="atualizarPreviewModalLabel()">
+						<label for="modal_labelImagem">Imagens de amostra: </label>
+						<input type="file" id="modal_labelImagem" onchange="atualizarPreviewModalLabel()" multiple accept="image/*">
 					</div>
-					<div id="modal_labelAmostraImagem" class="previewer" style="display: none">
+					<div id="modal_labelAmostraImagem" class="previewer" style="display: none; text-align: center; text-wrap: wrap; overflow-y: scroll; max-height: 300px;">
 						<hr>
 						<img src="#" class="imagemLabel" id="modal_labelPreview">
 						<hr>
@@ -39,10 +39,10 @@
 				<div id="modal_analise">
 					<div class="titulo">Análise</div>
 					<div class="flexForm">
-						<label for="modal_analiseImagem">Imagem para analisar: </label>
-						<input type="file" id="modal_analiseImagem" onchange="atualizarPreviewModalAnalise()">
+						<label for="modal_analiseImagem">Imagens para analisar: </label>
+						<input type="file" id="modal_analiseImagem" onchange="atualizarPreviewModalAnalise()" multiple accept="image/*">
 					</div>
-					<div id="modal_analiseAmostraImagem" class="previewer" style="display: none">
+					<div id="modal_analiseAmostraImagem" class="previewer" style="display: none; text-align: center; text-wrap: wrap; overflow-y: scroll; max-height: 300px;">
 						<hr>
 						<img src="#" class="imagemAnalise" id="modal_analisePreview">
 						<hr>

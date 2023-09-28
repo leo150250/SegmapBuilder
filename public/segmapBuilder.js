@@ -4,8 +4,8 @@ var preload=true;
 var maximoClassificacoes=10;
 var numAmostrasAleatorias=50;
 var emProcesso=false;
-var tamanhoMinimo=4;
-var tamanhoMaximo=32;
+var tamanhoMinimo=64;
+var tamanhoMaximo=64;
 var varRotacao=true;
 var varEscala=true;
 var varDeslocamento=true;
@@ -106,6 +106,7 @@ class Label {
 	legend = null;
 	imagem = null;
 	texto = null;
+	idLabel = 0;
 	constructor(argNomeLabel) {
 		this.nomeLabel=argNomeLabel;
 		this.criarFieldset();
@@ -160,14 +161,15 @@ class Label {
 function criarNovoLabel(argNomeLabel="label") {
 	let novoLabel=new Label(argNomeLabel);
 	labels.push(novoLabel);
+	novoLabel.idLabel = numLabels;
 	numLabels++;
 	divListaLabels.appendChild(novoLabel.fieldset);
 	return novoLabel;
 }
-function obterLabelCor(argCor) {
+function obterLabelCor(argCorHex) {
 	let labelEscolhido = null;
 	for (var i=0; i<numLabels; i++) {
-		if (labels[i].corLabel.hex()==argCor) {
+		if (labels[i].corLabel.hex()==argCorHex) {
 			labelEscolhido=labels[i];
 			break;
 		}
@@ -192,6 +194,7 @@ class Analise {
 	divStatus=null;
 	emExecucao=false;
 	numQuadrantes=0;
+	exibirOneChannel=false;
 	constructor(argFoto) {
 		this.criarDiv();
 		this.preencherFotoAnalise(argFoto);
@@ -207,15 +210,35 @@ class Analise {
 		this.canvasLabel.classList.add("analise_label");
 		this.canvasLabel.width=256;
 		this.canvasLabel.height=256;
+		this.oneChannel=document.createElement("div");
+		this.oneChannel.classList.add("analise_oneChannel");
+		this.oneChannel.style.display="none";
+		this.oneChannelIndices=[];
 		this.progresso=document.createElement("progress");
 		this.progresso.max=100;
 		this.progresso.value=0;
 		this.divStatus=document.createElement("div");
 		this.atualizarStatus();
+		this.divBotoes=document.createElement("div");
+		this.divBotoes.classList.add("analise_botoes");
+		this.buttonFechar = document.createElement("button");
+		this.buttonFechar.innerHTML = "X";
+		this.buttonFechar.title = "Fechar esta análise";
+		this.divBotoes.appendChild(this.buttonFechar);
+		this.buttonOneChannel = document.createElement("button");
+		this.buttonOneChannel.innerHTML = "1c";
+		this.buttonOneChannel.title = "Alternar exibição de listagem em um canal";
+		this.buttonOneChannel.disabled = true;
+		this.buttonOneChannel.onclick = ()=>{
+			this.computarOneChannel();
+		};
+		this.divBotoes.appendChild(this.buttonOneChannel);
 		this.divAnalise.appendChild(this.canvasFoto);
 		this.divAnalise.appendChild(this.canvasLabel);
+		this.divAnalise.appendChild(this.oneChannel);
 		this.divAnalise.appendChild(this.progresso);
 		this.divAnalise.appendChild(this.divStatus);
+		this.divAnalise.appendChild(this.divBotoes);
 	}
 	preencherFotoAnalise(argFoto) {
 		if (this.divAnalise!=null) {
@@ -232,6 +255,35 @@ class Analise {
 				this.imagemAnalise=this.imagemAnalise;
 				this.canvasFoto.src=this.imagemAnalise;
 			}
+		}
+	}
+	computarOneChannel() {
+		if (!this.exibirOneChannel) {
+			console.log("COMPUTANDO...");
+			this.oneChannel.innerHTML="";
+			let ctx = this.canvasLabel.getContext("2d", {alpha: false, antialias: false, willReadFrequently: true});
+			let imgData = ctx.getImageData(0,0,this.imagemAnalise.naturalWidth,this.imagemAnalise.naturalHeight);
+			let ctxData = imgData.data;
+			for (let indiceY=0; indiceY < this.imagemAnalise.naturalHeight; indiceY+=tamanhoMinimo) {
+				let indiceLinha = indiceY * this.imagemAnalise.naturalWidth;
+				//console.log("LINHA "+indiceY.toString() + " (" + indiceLinha.toString() + ")");
+				for (let indiceX=0; indiceX < this.imagemAnalise.naturalWidth; indiceX+=tamanhoMinimo) {
+					let indice = (indiceLinha + indiceX) * 4;
+					//console.log(ctxData[indice].toString() + "," + ctxData[indice+1].toString() + "," + ctxData[indice+2].toString());
+					this.oneChannel.innerHTML+=obterLabelCor("#"+ctxData[indice].toString(16).padStart(2,"0")+ctxData[indice+1].toString(16).padStart(2,"0")+ctxData[indice+2].toString(16).padStart(2,"0")).idLabel+",";
+				}
+				this.oneChannel.innerHTML+="<br>";
+			}
+			//console.log(ctxData);
+			this.exibirOneChannel=true;
+			this.oneChannel.style.display=null;
+			this.canvasFoto.style.display="none";
+			this.canvasLabel.style.display="none";
+		} else {
+			this.exibirOneChannel=false;
+			this.oneChannel.style.display="none";
+			this.canvasFoto.style.display=null;
+			this.canvasLabel.style.display=null;
 		}
 	}
 	atualizarProgresso(argQtd) {
@@ -262,11 +314,13 @@ class Analise {
 		this.momentoFim=0;
 		this.emExecucao=true;
 		this.atualizarStatus();
+		this.buttonOneChannel.disabled = true;
 	}
 	finalizarProcesso() {
 		this.momentoFim=Date.now();
 		this.emExecucao=false;
 		this.atualizarStatus();
+		this.buttonOneChannel.disabled = false;
 	}
 	obterDuracao() {
 		if (this.momentoFim==0) {
@@ -511,7 +565,7 @@ const inputModal_labelNome=document.getElementById("modal_labelNome");
 const inputModal_labelCor=document.getElementById("modal_labelCor");
 const inputModal_labelImagem=document.getElementById("modal_labelImagem");
 const divModal_labelAmostraImagem=document.getElementById("modal_labelAmostraImagem");
-const imgModal_labelPreview=document.getElementById("modal_labelPreview");
+//const imgModal_labelPreview=document.getElementById("modal_labelPreview");
 function aplicarNovoLabel(argNome=inputModal_labelNome.value, argCor=inputModal_labelCor.value, argImagem=inputModal_labelImagem) {
 	let nomeLabel=argNome;
 	if (nomeLabel=="") {
@@ -523,30 +577,38 @@ function aplicarNovoLabel(argNome=inputModal_labelNome.value, argCor=inputModal_
 	} else {
 		corLabel=new Cor(argCor);
 	}
-	//Cria o novo label
-	let novoLabel=criarNovoLabel(nomeLabel);
-	novoLabel.definirCor(corLabel.hex());
 	let imagemLabel=null;
 	//Adiciona a imagem à label, independente se ela vier de um input (adicionada pela GUI) ou de um img (pré-adicionada na página, pra fins de teste)
 	switch (argImagem.tagName) {
 		case "INPUT": {
-			let arquivoImagem = argImagem.files[0];
-			let leitorImagem = new FileReader();
-			leitorImagem.onload = function(e) {
-				let novaImagem = new Image();
-				novaImagem.onload=function() {
-					novoLabel.definirImagem(novaImagem);
-					if (tensorFlowIniciado) {
-						tensorflow_adicionarAmostra(novoLabel);
+			numImagens=argImagem.files.length;
+			for (let i=0; i<numImagens; i++) {
+				//Cria o novo label
+				let novoLabel=criarNovoLabel(nomeLabel);
+				novoLabel.definirCor(corLabel.hex());
+				//Cria o leitor
+				let leitorImagem = new FileReader();
+				leitorImagem.onload = function(e) {
+					let novaImagem = new Image();
+					novaImagem.onload=function() {
+						novoLabel.definirImagem(novaImagem);
+						if (tensorFlowIniciado) {
+							tensorflow_adicionarAmostra(novoLabel);
+						}
 					}
+					novaImagem.src=e.target.result;
 				}
-				novaImagem.src=e.target.result;
-			}
-			if (arquivoImagem!=null) {
-				leitorImagem.readAsDataURL(arquivoImagem);
+				let arquivoImagem = argImagem.files[i];
+				if (arquivoImagem!=null) {
+					console.log(argImagem.files[i]);
+					leitorImagem.readAsDataURL(arquivoImagem);
+				}
 			}
 		} break;
 		case "IMG": {
+			//Cria o novo label
+			let novoLabel=criarNovoLabel(nomeLabel);
+			novoLabel.definirCor(corLabel.hex());
 			novoLabel.definirImagem(argImagem);
 			if (tensorFlowIniciado) {
 				tensorflow_adicionarAmostra(novoLabel);
@@ -556,33 +618,46 @@ function aplicarNovoLabel(argNome=inputModal_labelNome.value, argCor=inputModal_
 	sumirModal();
 }
 function atualizarPreviewModalLabel() {
-	let arquivoImagem = inputModal_labelImagem.files[0];
-	let leitorImagem = new FileReader();
-	leitorImagem.onload = function(e) {
-		imgModal_labelPreview.src=e.target.result;
+	divModal_labelAmostraImagem.innerHTML="";
+	divModal_labelAmostraImagem.style.display="none";
+	divModal_labelAmostraImagem.appendChild(document.createElement("hr"));
+	let numArquivos = inputModal_labelImagem.files.length;
+	for (let i = 0; i < numArquivos; i++) {
+		let novoImg = document.createElement("img");
+		novoImg.classList.add("imagemLabel");
+		let arquivoImagem = inputModal_labelImagem.files[i];
+		let leitorImagem = new FileReader();
+		leitorImagem.onload = function(e) {
+			novoImg.src=e.target.result;
+		}
+		leitorImagem.readAsDataURL(arquivoImagem);
+		divModal_labelAmostraImagem.appendChild(novoImg);
 	}
-	leitorImagem.readAsDataURL(arquivoImagem);
+	divModal_labelAmostraImagem.appendChild(document.createElement("hr"));
 	divModal_labelAmostraImagem.style.display="block";
 }
 //Modal Analise:
 const inputModal_analiseImagem=document.getElementById("modal_analiseImagem");
 const divModal_analiseAmostraImagem=document.getElementById("modal_analiseAmostraImagem");
-const imgModal_analisePreview=document.getElementById("modal_analisePreview");
+//const imgModal_analisePreview=document.getElementById("modal_analisePreview");
 function aplicarNovaAnalise(argImagem=inputModal_analiseImagem) {
 	let novaAnalise=null;
 	switch (argImagem.tagName) {
 		case "INPUT": {
-			let arquivoImagem = argImagem.files[0];
-			let leitorImagem = new FileReader();
-			leitorImagem.onload = function(e) {
-				let novaImagem = new Image();
-				novaImagem.onload=function() {
-					novaAnalise=criarNovaAnalise(novaImagem);
+			let numAnalises = argImagem.files.length;
+			for (let i = 0; i < numAnalises; i++) {
+				let arquivoImagem = argImagem.files[i];
+				let leitorImagem = new FileReader();
+				leitorImagem.onload = function(e) {
+					let novaImagem = new Image();
+					novaImagem.onload=function() {
+						novaAnalise=criarNovaAnalise(novaImagem);
+					}
+					novaImagem.src=e.target.result;
 				}
-				novaImagem.src=e.target.result;
-			}
-			if (arquivoImagem!=null) {
-				leitorImagem.readAsDataURL(arquivoImagem);
+				if (arquivoImagem!=null) {
+					leitorImagem.readAsDataURL(arquivoImagem);
+				}
 			}
 		} break;
 		case "IMG": {
@@ -592,12 +667,22 @@ function aplicarNovaAnalise(argImagem=inputModal_analiseImagem) {
 	sumirModal();
 }
 function atualizarPreviewModalAnalise() {
-	let arquivoImagem = inputModal_analiseImagem.files[0];
-	let leitorImagem = new FileReader();
-	leitorImagem.onload = function(e) {
-		imgModal_analisePreview.src=e.target.result;
+	divModal_analiseAmostraImagem.innerHTML="";
+	divModal_analiseAmostraImagem.style.display="none";
+	divModal_analiseAmostraImagem.appendChild(document.createElement("hr"));
+	let numArquivos = inputModal_analiseImagem.files.length;
+	for (let i = 0; i < numArquivos; i++) {
+		let novoImg = document.createElement("img");
+		novoImg.classList.add("imagemAnalise");
+		let arquivoImagem = inputModal_analiseImagem.files[i];
+		let leitorImagem = new FileReader();
+		leitorImagem.onload = function(e) {
+			novoImg.src=e.target.result;
+		}
+		leitorImagem.readAsDataURL(arquivoImagem);
+		divModal_analiseAmostraImagem.appendChild(novoImg);
 	}
-	leitorImagem.readAsDataURL(arquivoImagem);
+	divModal_analiseAmostraImagem.appendChild(document.createElement("hr"));
 	divModal_analiseAmostraImagem.style.display="block";
 }
 //Modal Configurações:
@@ -818,6 +903,7 @@ document.body.onload=async function(){
 	atualizarStatusGeral();
 	//carregarAmostrasExemplo();
 	iniciarTensorflow();
+	//criarNovaAnalise(document.getElementById("testeAnalise"));
 }
 function carregarAmostrasExemplo() {
 	aplicarNovoLabel("tijolo","#7F0000",document.getElementById("testeLabel"));
