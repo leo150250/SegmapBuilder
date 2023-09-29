@@ -179,6 +179,46 @@ function obterLabelCor(argCorHex) {
 	};
 	return labelEscolhido;
 }
+class LabelLista {
+	nomeLabel = "";
+	corLabel = new Cor();
+	constructor (argCor, argNome) {
+		let cores=argCor.split(" ");
+		this.corLabel.r = parseInt(cores[0]);
+		this.corLabel.g = parseInt(cores[1]);
+		this.corLabel.b = parseInt(cores[2]);
+		this.nomeLabel = argNome;
+	}
+}
+var listaLabelsCriar=[];
+function enviarListaLabels() {
+	let inputListaLabels = document.createElement("input");
+	inputListaLabels.type = "file";
+	inputListaLabels.accept = ".txt";
+	inputListaLabels.click();
+	inputListaLabels.onchange=()=>{
+		//console.log("MA OEEEEE");
+		let readerLista = new FileReader();
+		readerLista.onload = ()=>{
+			let linhas = readerLista.result.split(/\r?\n|\r|\n/g);
+			linhas.forEach(linha => {
+				let linhaConteudo = linha.split(/\t/g);
+				let novoLabelLista = new LabelLista(linhaConteudo[0],linhaConteudo[1]);
+				listaLabelsCriar.push(novoLabelLista);
+			});
+			abrirListaLabel();
+		}
+		readerLista.readAsText(inputListaLabels.files[0]);
+	}
+}
+function abrirListaLabel() {
+	if (listaLabelsCriar.length>0) {
+		exibirModal('label');
+		inputModal_labelNome.value = listaLabelsCriar[0].nomeLabel;
+		inputModal_labelCor.value = listaLabelsCriar[0].corLabel.hex();
+		listaLabelsCriar.shift();
+	}
+}
 
 //Analises
 const divListaAnalises=document.getElementById("listaAnalises");
@@ -626,6 +666,7 @@ function aplicarNovoLabel(argNome=inputModal_labelNome.value, argCor=inputModal_
 		} break;
 	}
 	sumirModal();
+	abrirListaLabel();
 }
 function atualizarPreviewModalLabel() {
 	divModal_labelAmostraImagem.innerHTML="";
